@@ -31,10 +31,16 @@ npm run dev
 
 The permanent preview is published with GitHub Pages from the `main` branch using `.github/workflows/deploy-pages.yml`.
 
-Production URL:
+Production URL options:
 
 ```txt
 https://nathanaelduberry.github.io/Pet-Memory/
+```
+
+If GitHub Pages is delayed, the same `gh-pages` static build can be previewed through a CDN URL:
+
+```txt
+https://cdn.jsdelivr.net/gh/nathanaelduberry/Pet-Memory@gh-pages/index.html
 ```
 
 ## Current status
