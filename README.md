@@ -20,6 +20,23 @@ Pet Memory helps families create living digital memorials for beloved pets. Each
 
 Memoria focuses on human memorials. Pet Memory should feel related in purpose and quality, but distinct in tone: softer, more pet-oriented, more playful where appropriate, and less formal/funeral-like.
 
+## Local development
+
+```bash
+npm install
+npm run dev
+```
+
+## Deployment
+
+The permanent preview is published with GitHub Pages from the `main` branch using `.github/workflows/deploy-pages.yml`.
+
+Production URL:
+
+```txt
+https://nathanaelduberry.github.io/Pet-Memory/
+```
+
 ## Current status
 
 Initial repository scaffold in progress.
