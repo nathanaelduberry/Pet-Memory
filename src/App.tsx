@@ -17,16 +17,17 @@ export default function App() {
           <span>PetMemory</span>
         </a>
         <nav className="nav-links" aria-label="Primary navigation">
+          <a href="#account">Account</a>
           <a href="#studio">Studio</a>
           <a href="#products">Products</a>
           <a href="#customize">Customize</a>
           <a href="#preview">Preview</a>
           <a href="#checkout">Checkout</a>
-          <a href="#account">Account</a>
           <a href="#trust">Privacy</a>
         </nav>
       </header>
 
+      <AccountPortal />
       <Hero />
 
       <section id="memorial" className="section-block intro-section">
@@ -43,7 +44,6 @@ export default function App() {
 
       <WaysToRemember />
       <ProductExperience />
-      <AccountPortal />
       <MemoryGardenTimeline />
       <PrivacyTrustSection />
       <KeepsakePlaqueSection />
