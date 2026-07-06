@@ -1,6 +1,6 @@
 import { FormEvent, SyntheticEvent, useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { KeyRound, LogOut, PawPrint, ShoppingBasket, Sparkles, UserRound } from 'lucide-react';
+import { Heart, KeyRound, LogOut, PawPrint, ShoppingBasket, Sparkles, UserRound } from 'lucide-react';
 import { isSupabaseConfigured, supabase, supabaseProjectUrl } from '../lib/supabase';
 
 const portalPets = [
@@ -16,6 +16,13 @@ const portalPets = [
   }
 ];
 
+const exampleMoments = [
+  'First beach walk saved as a timeline moment',
+  'Favourite blue blanket photo kept for family only',
+  'Last sunny porch afternoon remembered with gratitude'
+];
+
+const exampleRespects = ['Candle from Mum', 'Flower from Jordan', 'Pawprint from Nate'];
 const savedKeepsakes = ['Memory Locket', 'Mini Memorial Stone', 'Photo Keepsake Print'];
 
 type AuthAction = 'sign-in' | 'sign-up';
@@ -159,12 +166,18 @@ export default function AccountPortal() {
           </p>
         </form>
 
-        <div className="portal-dashboard" aria-label="Personalized account preview">
+        <div className="portal-dashboard" aria-label={user ? 'Personalized account dashboard' : 'Read-only example memorial account'}>
           <article>
             <div className="portal-card-heading">
               <PawPrint size={20} aria-hidden="true" />
-              <h3>{user ? 'My Animals' : 'My Animals Preview'}</h3>
+              <h3>{user ? 'My Animals' : 'Example Animals'}</h3>
             </div>
+            {!user && (
+              <div className="portal-note">
+                <h3>Example Memorial Account</h3>
+                <p>Read this example while signed out. Sign in to save your own pets, timeline moments, respects, and basket.</p>
+              </div>
+            )}
             {portalPets.map((pet) => (
               <div className="pet-row" key={pet.name}>
                 <strong>{pet.name}</strong>
@@ -172,6 +185,26 @@ export default function AccountPortal() {
                 <p>{pet.detail}</p>
               </div>
             ))}
+          </article>
+
+          <article>
+            <div className="portal-card-heading">
+              <Sparkles size={20} aria-hidden="true" />
+              <h3>{user ? 'Timeline' : 'Example Timeline'}</h3>
+            </div>
+            <ul className="saved-list">
+              {exampleMoments.map((moment) => <li key={moment}>{moment}</li>)}
+            </ul>
+          </article>
+
+          <article>
+            <div className="portal-card-heading">
+              <Heart size={20} aria-hidden="true" />
+              <h3>{user ? 'Respects' : 'Example Respects'}</h3>
+            </div>
+            <ul className="saved-list">
+              {exampleRespects.map((respect) => <li key={respect}>{respect}</li>)}
+            </ul>
           </article>
 
           <article>
@@ -187,7 +220,7 @@ export default function AccountPortal() {
           <article className="basket-card">
             <div className="portal-card-heading">
               <ShoppingBasket size={20} aria-hidden="true" />
-              <h3>Basket</h3>
+              <h3>{user ? 'Basket' : 'Example Basket'}</h3>
             </div>
             <strong>2 remembrance items</strong>
             <p>Garden Marker and Memory Locket saved for Bailey. Checkout can later hydrate from the signed-in user's basket.</p>

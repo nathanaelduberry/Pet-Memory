@@ -87,15 +87,25 @@ describe('PetMemory living memory garden experience', () => {
     expect(visibleText()).toMatch(/gcgedkovyaedjhbnntjw\.supabase\.co/i);
   });
 
+  it('shows a read-only example account page before someone logs in', () => {
+    render(<App />);
+
+    expect(screen.getByRole('heading', { name: /example memorial account/i })).toBeInTheDocument();
+    expect(screen.getByText(/read this example while signed out/i)).toBeInTheDocument();
+    expect(screen.getByText(/sign in to save your own pets, timeline moments, respects, and basket/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /example animals/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /example timeline/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /example respects/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /example basket/i })).toBeInTheDocument();
+  });
+
   it('shows account-owned pets, memorial drafts, saved products, and basket summary', () => {
     render(<App />);
 
-    expect(screen.getByRole('heading', { name: /my animals/i })).toBeInTheDocument();
     expect(screen.getAllByText(/Bailey/i)[0]).toBeInTheDocument();
     expect(screen.getByText(/memorial draft/i)).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /saved keepsakes/i })).toBeInTheDocument();
     expect(screen.getAllByText(/Memory Locket/i)[0]).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /basket/i })).toBeInTheDocument();
     expect(screen.getByText(/2 remembrance items/i)).toBeInTheDocument();
   });
 
