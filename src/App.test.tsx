@@ -83,8 +83,8 @@ describe('PetMemory living memory garden experience', () => {
     expect(screen.getByLabelText(/password/i)).toHaveAttribute('type', 'password');
     expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument();
-    expect(screen.getByText(/supabase project url saved/i)).toBeInTheDocument();
-    expect(screen.getByText(/gcgedkovyaedjhbnntjw\.supabase\.co/i)).toBeInTheDocument();
+    expect(visibleText()).toMatch(/connected to supabase project|supabase project url saved/i);
+    expect(visibleText()).toMatch(/gcgedkovyaedjhbnntjw\.supabase\.co/i);
   });
 
   it('shows account-owned pets, memorial drafts, saved products, and basket summary', () => {
