@@ -1,4 +1,4 @@
-import { FormEvent, SyntheticEvent, useEffect, useState } from 'react';
+import { ChangeEvent, FormEvent, SyntheticEvent, useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { Heart, KeyRound, LogOut, PawPrint, Plus, ShoppingBasket, Sparkles, UserRound } from 'lucide-react';
 import { isSupabaseConfigured, supabase, supabaseProjectUrl } from '../lib/supabase';
@@ -58,6 +58,15 @@ export default function AccountPortal() {
   const [moments, setMoments] = useState<Moment[]>([]);
   const [respects, setRespects] = useState<Respect[]>([]);
   const [basket, setBasket] = useState<BasketItem[]>([]);
+  const [vaultPetName, setVaultPetName] = useState('');
+  const [vaultLifeDates, setVaultLifeDates] = useState('');
+  const [vaultMomentDate, setVaultMomentDate] = useState('');
+  const [vaultMomentTime, setVaultMomentTime] = useState('');
+  const [vaultMemory, setVaultMemory] = useState('');
+  const [vaultPhoto, setVaultPhoto] = useState<File | null>(null);
+  const [vaultVideo, setVaultVideo] = useState<File | null>(null);
+  const [vaultPhotoName, setVaultPhotoName] = useState('No saved pet photo selected');
+  const [vaultVideoName, setVaultVideoName] = useState('No saved memory video selected');
 
   const visiblePets = user ? pets : examplePets;
   const visibleMoments = user ? moments : exampleMoments;
@@ -221,6 +230,74 @@ export default function AccountPortal() {
     setIsSubmitting(false);
   };
 
+  const handleVaultPhoto = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setVaultPhoto(file);
+    setVaultPhotoName(file.name);
+  };
+
+  const handleVaultVideo = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setVaultVideo(file);
+    setVaultVideoName(file.name);
+  };
+
+  const saveVaultDraft = async () => {
+    if (!user || !supabase) {
+      setMessage('Sign in to save photos, videos, dates, times, and memories to your vault.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setMessage('Saving memory vault draft…');
+
+    let photoPath = '';
+    let videoPath = '';
+    const mediaFolder = `${user.id}/${Date.now()}`;
+
+    if (vaultPhoto) {
+      const { data } = await supabase.storage.from('memorial-media').upload(`${mediaFolder}/${vaultPhoto.name}`, vaultPhoto, { upsert: true });
+      photoPath = data?.path ?? '';
+    }
+
+    if (vaultVideo) {
+      const { data } = await supabase.storage.from('memorial-media').upload(`${mediaFolder}/${vaultVideo.name}`, vaultVideo, { upsert: true });
+      videoPath = data?.path ?? '';
+    }
+
+    const { data: pet, error: petError } = await supabase.from('pets').insert({
+      owner_id: user.id,
+      name: vaultPetName || 'Untitled memorial',
+      species: 'Beloved pet',
+      privacy: 'private',
+      story: vaultMemory,
+      photo_url: photoPath,
+      metadata: { lifeDates: vaultLifeDates, primaryVideo: videoPath }
+    }).select('id,name,species,passed_date,privacy,story').single();
+
+    if (petError || !pet) {
+      setMessage(petError?.message || 'Could not save vault draft yet.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    await supabase.from('moments').insert({
+      pet_id: pet.id,
+      owner_id: user.id,
+      title: vaultMemory ? vaultMemory.slice(0, 80) : 'Saved memory',
+      body: vaultMemory,
+      moment_date: vaultMomentDate || null,
+      metadata: { momentTime: vaultMomentTime, videoPath }
+    });
+
+    setPets((current) => [pet as Pet, ...current]);
+    setMoments((current) => [{ id: `local-${Date.now()}`, pet_id: pet.id, title: vaultMemory || 'Saved memory', moment_date: vaultMomentDate || null }, ...current]);
+    setMessage('Saved to your signed-in memory vault.');
+    setIsSubmitting(false);
+  };
+
   return (
     <section id="account" className="account-portal">
       <div className="section-title-row account-title">
@@ -271,6 +348,26 @@ export default function AccountPortal() {
               : `Supabase URL saved: ${supabaseProjectUrl}. Add the anon key to make sign in live.`)}
           </p>
         </form>
+
+        <div className="memory-vault-card">
+          <p className="brown-eyebrow"><Sparkles size={14} /> Saved media and moments</p>
+          <h3>Signed-in memory vault</h3>
+          <p>Save photos, videos, dates, times, and memories</p>
+          <div className="vault-grid">
+            <label>Vault pet name<input value={vaultPetName} onChange={(event) => setVaultPetName(event.target.value)} placeholder="Milo" /></label>
+            <label>Vault life dates<input value={vaultLifeDates} onChange={(event) => setVaultLifeDates(event.target.value)} placeholder="2015 - 2026" /></label>
+            <label>Vault moment date<input type="date" value={vaultMomentDate} onChange={(event) => setVaultMomentDate(event.target.value)} /></label>
+            <label>Vault moment time<input type="time" value={vaultMomentTime} onChange={(event) => setVaultMomentTime(event.target.value)} /></label>
+          </div>
+          <label>Vault memory<textarea value={vaultMemory} onChange={(event) => setVaultMemory(event.target.value)} placeholder="Write the memory, respect note, or moment." /></label>
+          <div className="vault-grid">
+            <label>Saved pet photo<input type="file" accept="image/*" onChange={handleVaultPhoto} /></label>
+            <label>Saved memory video<input type="file" accept="video/*" onChange={handleVaultVideo} /></label>
+          </div>
+          <p>{vaultPhotoName}</p>
+          <p>{vaultVideoName}</p>
+          <button className="sage-button" type="button" onClick={saveVaultDraft} disabled={isSubmitting}>Save memory vault draft</button>
+        </div>
 
         <div className="portal-dashboard" aria-label={user ? 'Saved account dashboard' : 'Read-only example memorial account'}>
           {!user && <div className="example-banner"><strong>Example Memorial Account</strong><span>Read this while signed out. Sign in to save your own pets, moments, respects, and basket.</span></div>}

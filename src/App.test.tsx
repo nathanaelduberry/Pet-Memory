@@ -13,6 +13,7 @@ vi.mock('./lib/supabase', () => ({
       signInWithPassword: vi.fn(async () => ({ data: { user: null }, error: null })),
       signOut: vi.fn(async () => ({ error: null }))
     },
+    storage: { from: vi.fn(() => ({ upload: vi.fn(async () => ({ data: null, error: { message: 'bucket missing in test' } })) })) },
     from: vi.fn(() => ({
       select: vi.fn(() => ({ order: vi.fn(async () => ({ data: [], error: null })) })),
       upsert: vi.fn(async () => ({ error: null })),
@@ -23,16 +24,18 @@ vi.mock('./lib/supabase', () => ({
 
 const visibleText = () => document.body.textContent ?? '';
 
-describe('PetMemory 1c desktop and 1g mobile implementation', () => {
+describe('PetMemory commerce and memorial builder', () => {
   beforeEach(() => {
     vi.stubGlobal('URL', {
       createObjectURL: vi.fn(() => 'blob:pet-photo-preview'),
       revokeObjectURL: vi.fn()
     });
+    localStorage.clear();
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
   it('implements the selected 1c premium desktop landing direction', () => {
@@ -41,21 +44,70 @@ describe('PetMemory 1c desktop and 1g mobile implementation', () => {
     expect(screen.getByRole('heading', { name: /a memorial worthy of a life well loved/i })).toBeInTheDocument();
     expect(screen.getByText(/handcrafted remembrance/i)).toBeInTheDocument();
     expect(screen.getAllByText(/hand-cast/i)[0]).toBeInTheDocument();
-    expect(screen.getByText(/7–10 days/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/7–10 days/i)[0]).toBeInTheDocument();
     expect(screen.getByText(/lifetime/i)).toBeInTheDocument();
     expect(screen.getAllByText(/the oakford plaque/i)[0]).toBeInTheDocument();
   });
 
-  it('connects keepsake/plaque buttons to the dropship order flow', () => {
+  it('lands customize buttons on real in-app white-label item pages instead of external handoff links', () => {
     render(<App />);
 
     const customizeLinks = screen.getAllByRole('link', { name: /customize/i });
-    expect(customizeLinks).toHaveLength(3);
-    expect(customizeLinks[0]).toHaveAttribute('href', expect.stringContaining('https://dropship.petmemory.app/order'));
-    expect(customizeLinks[0]).toHaveAttribute('href', expect.stringContaining('product=oakford-plaque'));
-    expect(customizeLinks[0]).toHaveAttribute('target', '_blank');
+    expect(customizeLinks).toHaveLength(6);
+    expect(customizeLinks[0]).toHaveAttribute('href', '#customize/oakford-plaque');
+    expect(customizeLinks[1]).toHaveAttribute('href', '#customize/portrait-frame');
+    expect(customizeLinks[2]).toHaveAttribute('href', '#customize/garden-stone');
 
-    expect(screen.getByRole('link', { name: /continue to dropship checkout/i })).toHaveAttribute('href', expect.stringContaining('dropship.petmemory.app/order'));
+    expect(screen.getAllByRole('heading', { name: /customize the oakford plaque/i })[0]).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /white-label checkout/i })).toBeInTheDocument();
+  });
+
+  it('creates an itemized purchasable memorial inventory with add-to-basket controls', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    expect(screen.getByRole('heading', { name: /inventory memorials/i })).toBeInTheDocument();
+    expect(screen.getByText(/bronze plaque/i)).toBeInTheDocument();
+    expect(screen.getByText(/museum portrait frame/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/garden stone/i)[0]).toBeInTheDocument();
+
+    await user.click(screen.getAllByRole('button', { name: /add to basket/i })[0]);
+    expect(screen.getByText(/basket · 1 item/i)).toBeInTheDocument();
+    expect(screen.getByText(/guest checkout available/i)).toBeInTheDocument();
+  });
+
+  it('supports importing pictures and videos into the customizer with live previews', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    const image = new File(['pet-image'], 'milo.jpg', { type: 'image/jpeg' });
+    const video = new File(['pet-video'], 'milo-run.mp4', { type: 'video/mp4' });
+
+    await user.upload(screen.getByLabelText(/import memorial photo/i), image);
+    await user.upload(screen.getByLabelText(/import memorial video/i), video);
+
+    expect(screen.getByAltText(/custom memorial photo preview/i)).toHaveAttribute('src', 'blob:pet-photo-preview');
+    expect(screen.getByText(/milo.jpg/i)).toBeInTheDocument();
+    expect(screen.getByText(/milo-run.mp4/i)).toBeInTheDocument();
+  });
+
+  it('captures item customization, dates, times, and memories for checkout', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.clear(screen.getByLabelText(/^pet name$/i));
+    await user.type(screen.getByLabelText(/^pet name$/i), 'Milo');
+    await user.type(screen.getByLabelText(/^life dates$/i), '2015 - 2026');
+    await user.clear(screen.getByLabelText(/^favorite memory$/i));
+    await user.type(screen.getByLabelText(/^favorite memory$/i), 'Always sleeping in the sun.');
+    await user.type(screen.getByLabelText(/^moment date$/i), '2026-07-06');
+    await user.type(screen.getByLabelText(/^moment time$/i), '09:41');
+    await user.selectOptions(screen.getByLabelText(/^finish$/i), 'Walnut frame');
+
+    expect(screen.getAllByText(/Milo/i)[0]).toBeInTheDocument();
+    expect(screen.getByText(/2015 - 2026/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Always sleeping in the sun/i)[0]).toBeInTheDocument();
+    expect(screen.getAllByText(/Walnut frame/i)[0]).toBeInTheDocument();
   });
 
   it('adds the selected 1g mobile memorial card with timeline and respects', () => {
@@ -73,7 +125,7 @@ describe('PetMemory 1c desktop and 1g mobile implementation', () => {
     expect(screen.getAllByText(/pawprints/i)[0]).toBeInTheDocument();
   });
 
-  it('keeps Supabase signup/login portal visible and connected', () => {
+  it('keeps Supabase signup/login portal visible and ready for deeper saved memorials', () => {
     render(<App />);
 
     expect(screen.getByRole('heading', { name: /sign in to save the memorial/i })).toBeInTheDocument();
@@ -81,6 +133,9 @@ describe('PetMemory 1c desktop and 1g mobile implementation', () => {
     expect(screen.getByLabelText(/password/i)).toHaveAttribute('type', 'password');
     expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /signed-in memory vault/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/saved pet photo/i)).toHaveAttribute('accept', 'image/*');
+    expect(screen.getByLabelText(/saved memory video/i)).toHaveAttribute('accept', 'video/*');
     expect(visibleText()).toMatch(/connected to supabase/i);
   });
 
@@ -93,25 +148,5 @@ describe('PetMemory 1c desktop and 1g mobile implementation', () => {
     expect(screen.getByRole('heading', { name: /example respects/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /example basket/i })).toBeInTheDocument();
     expect(screen.getByText(/the oakford plaque, the portrait frame/i)).toBeInTheDocument();
-  });
-
-  it('previews uploaded pet photos immediately and revokes the blob when replaced', async () => {
-    const user = userEvent.setup();
-    render(<App />);
-
-    const upload = screen.getByLabelText(/add their photo/i);
-    const firstFile = new File(['first'], 'first-pet.png', { type: 'image/png' });
-    await user.upload(upload, firstFile);
-
-    const preview = screen.getByRole('img', { name: /uploaded pet preview/i });
-    expect(preview).toHaveAttribute('src', 'blob:pet-photo-preview');
-    expect(screen.getByText(/first-pet.png/i)).toBeInTheDocument();
-    expect(URL.createObjectURL).toHaveBeenCalledWith(firstFile);
-
-    const secondFile = new File(['second'], 'second-pet.jpg', { type: 'image/jpeg' });
-    await user.upload(upload, secondFile);
-
-    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:pet-photo-preview');
-    expect(screen.getByText(/second-pet.jpg/i)).toBeInTheDocument();
   });
 });
