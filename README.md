@@ -4,17 +4,20 @@ Pet Memory is the pet-oriented sister program to **Memoria**, Nate's brother's m
 
 ## Product direction
 
-Pet Memory helps families create living digital memorials for beloved pets. Each memorial should feel like a gentle memory garden: a profile, story, photos, timeline moments, respects from visitors, written tributes, and eventually a physical QR plaque that links back to the memorial.
+Pet Memory is a living memory garden for beloved pets. It helps people turn the grief of losing an animal into a gentle tribute filled with photos, stories, shared love, quiet acts of remembrance, and lasting keepsakes.
+
+The product should feel like a sanctuary, not a SaaS dashboard: warm, safe, tender, honest, peaceful, and lightly hopeful. The language should speak to people who loved an animal like family and need somewhere for that love to continue living.
 
 ## Approved initial scope
 
 - Recreate the website/app from scratch instead of patching the current prototype.
-- Build the main structure first, then redesign the theme once flows are stable.
+- Build around the emotional promise first: honoring, remembering, grieving, and cherishing beloved pets.
 - Use warm, calm, pet-focused design language.
 - Fix photo preview/upload reliability.
-- Add Moments to memorial profile cards.
-- Add Respects and Tributes to cards and profile pages.
-- Add an Order Memorial Plaque CTA and prepare it for a dropship checkout flow.
+- Add a memory garden/timeline to memorial profile cards.
+- Keep Respects and Tributes emotionally distinct: low-pressure acts of love versus written shared memories.
+- Position QR plaques as keepsakes for meaningful places while preserving a dropship handoff under the hood.
+- Make memorials feel private by default, shareable by link, and owner-controlled.
 
 ## Relationship to Memoria
 

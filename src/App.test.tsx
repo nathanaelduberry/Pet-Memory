@@ -2,7 +2,9 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 
-describe('PetMemory landing experience', () => {
+const visibleText = () => document.body.textContent ?? '';
+
+describe('PetMemory living memory garden experience', () => {
   beforeEach(() => {
     vi.stubGlobal('URL', {
       createObjectURL: vi.fn(() => 'blob:pet-photo-preview'),
@@ -14,37 +16,67 @@ describe('PetMemory landing experience', () => {
     vi.unstubAllGlobals();
   });
 
-  it('positions PetMemory as a pet-oriented sister product to Memoria', () => {
+  it('leads with an emotional living-memory-garden promise', () => {
     render(<App />);
 
-    expect(screen.getByRole('heading', { name: /petmemory/i })).toBeInTheDocument();
-    expect(screen.getAllByText(/sister program to memoria/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/pet-oriented memorial application/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /for the pets who never really leave us/i })).toBeInTheDocument();
+    expect(screen.getByText(/a living memory garden for beloved pets/i)).toBeInTheDocument();
+    expect(screen.getByText(/give all that love somewhere gentle to live/i)).toBeInTheDocument();
   });
 
-  it('surfaces the approved MVP feature pillars', () => {
+  it('uses gentle user-facing calls to action', () => {
     render(<App />);
 
-    expect(screen.getByRole('heading', { name: /moments/i })).toBeInTheDocument();
-    expect(screen.getAllByRole('heading', { name: /respects/i }).length).toBeGreaterThan(0);
-    expect(screen.getAllByRole('heading', { name: /tributes/i }).length).toBeGreaterThan(0);
-    expect(screen.getByRole('heading', { name: /memorial plaques/i })).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: /begin their memorial/i })[0]).toHaveAttribute('href', '#begin');
+    expect(screen.getByRole('link', { name: /visit memorials/i })).toHaveAttribute('href', '#memorial');
+    expect(screen.getAllByRole('link', { name: /create a keepsake plaque/i })[0]).toHaveAttribute('href', expect.stringContaining('dropship'));
   });
 
-  it('connects the memorial plaque order button to a dropship handoff URL', () => {
+  it('explains the ways people can remember without internal product language', () => {
     render(<App />);
 
-    const plaqueLinks = screen.getAllByRole('link', { name: /order a memorial plaque/i });
-    expect(plaqueLinks[0]).toHaveAttribute('href', expect.stringContaining('dropship'));
-    expect(plaqueLinks[0]).toHaveAttribute('target', '_blank');
-    expect(plaqueLinks[0]).toHaveAttribute('rel', expect.stringContaining('noopener'));
+    expect(screen.getByRole('heading', { name: /ways to remember/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /tell their story/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /quiet acts of love/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /shared memories/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /lasting keepsakes/i })).toBeInTheDocument();
+  });
+
+  it('keeps respects and tributes emotionally distinct', () => {
+    render(<App />);
+
+    expect(screen.getByText(/light a candle/i)).toBeInTheDocument();
+    expect(screen.getByText(/leave a flower/i)).toBeInTheDocument();
+    expect(screen.getByText(/send a pawprint/i)).toBeInTheDocument();
+    expect(screen.getByText(/family and friends can add the memories only they carry/i)).toBeInTheDocument();
+  });
+
+  it('reframes plaques as keepsakes while preserving the dropship handoff', () => {
+    render(<App />);
+
+    expect(screen.getByRole('heading', { name: /a keepsake for the places they loved/i })).toBeInTheDocument();
+    expect(screen.getByText(/garden marker, urn plate, or framed plaque/i)).toBeInTheDocument();
+
+    const keepsakeLinks = screen.getAllByRole('link', { name: /create a keepsake plaque/i });
+    expect(keepsakeLinks[0]).toHaveAttribute('href', expect.stringContaining('dropship'));
+    expect(keepsakeLinks[0]).toHaveAttribute('target', '_blank');
+    expect(keepsakeLinks[0]).toHaveAttribute('rel', expect.stringContaining('noopener'));
+  });
+
+  it('reassures families that memorials are private and owner-controlled', () => {
+    render(<App />);
+
+    expect(screen.getByRole('heading', { name: /your memorial, shared only how you choose/i })).toBeInTheDocument();
+    expect(screen.getByText(/private by default/i)).toBeInTheDocument();
+    expect(screen.getByText(/shareable by link/i)).toBeInTheDocument();
+    expect(screen.getByText(/moderate tributes/i)).toBeInTheDocument();
   });
 
   it('previews uploaded pet photos immediately and revokes the blob when replaced', async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    const upload = screen.getByLabelText(/upload pet photo/i);
+    const upload = screen.getByLabelText(/add their photo/i);
     const firstFile = new File(['first'], 'first-pet.png', { type: 'image/png' });
     await user.upload(upload, firstFile);
 
@@ -60,12 +92,9 @@ describe('PetMemory landing experience', () => {
     expect(screen.getByText(/second-pet.jpg/i)).toBeInTheDocument();
   });
 
-  it('adds timeline moments and respect activity to memorial profile cards', () => {
+  it('keeps internal roadmap and vendor language out of visible copy', () => {
     render(<App />);
 
-    expect(screen.getByRole('heading', { name: /bailey's timeline/i })).toBeInTheDocument();
-    expect(screen.getByText(/first beach day/i)).toBeInTheDocument();
-    expect(screen.getByText(/latest respect/i)).toBeInTheDocument();
-    expect(screen.getByText(/left a flower/i)).toBeInTheDocument();
+    expect(visibleText()).not.toMatch(/MVP|Dropship-ready|payload|Create\/Edit flow|photo preview reliability|supplier integration/i);
   });
 });
