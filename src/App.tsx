@@ -27,8 +27,8 @@ export default function App() {
         </nav>
       </header>
 
-      <AccountPortal />
       <Hero />
+      <AccountPortal />
 
       <section id="memorial" className="section-block intro-section">
         <div className="section-heading split-heading">
