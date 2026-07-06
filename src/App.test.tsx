@@ -72,6 +72,30 @@ describe('PetMemory living memory garden experience', () => {
     expect(screen.getByRole('link', { name: /^customize$/i })).toHaveAttribute('href', '#customize');
     expect(screen.getByRole('link', { name: /^preview$/i })).toHaveAttribute('href', '#preview');
     expect(screen.getByRole('link', { name: /^checkout$/i })).toHaveAttribute('href', '#checkout');
+    expect(screen.getByRole('link', { name: /^account$/i })).toHaveAttribute('href', '#account');
+  });
+
+  it('introduces a Supabase-ready login portal for personalized memorials and baskets', () => {
+    render(<App />);
+
+    expect(screen.getByRole('heading', { name: /your petmemory portal/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/email address/i)).toHaveAttribute('type', 'email');
+    expect(screen.getByLabelText(/password/i)).toHaveAttribute('type', 'password');
+    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument();
+    expect(screen.getByText(/supabase auth can connect here/i)).toBeInTheDocument();
+  });
+
+  it('shows account-owned pets, memorial drafts, saved products, and basket summary', () => {
+    render(<App />);
+
+    expect(screen.getByRole('heading', { name: /my animals/i })).toBeInTheDocument();
+    expect(screen.getAllByText(/Bailey/i)[0]).toBeInTheDocument();
+    expect(screen.getByText(/memorial draft/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /saved keepsakes/i })).toBeInTheDocument();
+    expect(screen.getAllByText(/Memory Locket/i)[0]).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /basket/i })).toBeInTheDocument();
+    expect(screen.getByText(/2 remembrance items/i)).toBeInTheDocument();
   });
 
   it('shows products with prices and a checkout path while preserving the dropship handoff', () => {

@@ -5,6 +5,7 @@ import MemoryGardenTimeline from './components/MemoryGardenTimeline';
 import KeepsakePlaqueSection from './components/KeepsakePlaqueSection';
 import PrivacyTrustSection from './components/PrivacyTrustSection';
 import ProductExperience from './components/ProductExperience';
+import AccountPortal from './components/AccountPortal';
 import FinalCta from './components/FinalCta';
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
           <a href="#customize">Customize</a>
           <a href="#preview">Preview</a>
           <a href="#checkout">Checkout</a>
+          <a href="#account">Account</a>
           <a href="#trust">Privacy</a>
         </nav>
       </header>
@@ -41,6 +43,7 @@ export default function App() {
 
       <WaysToRemember />
       <ProductExperience />
+      <AccountPortal />
       <MemoryGardenTimeline />
       <PrivacyTrustSection />
       <KeepsakePlaqueSection />
