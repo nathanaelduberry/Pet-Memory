@@ -17,8 +17,9 @@ export default function App() {
         </a>
         <nav className="nav-links" aria-label="Primary navigation">
           <a href="#studio">Studio</a>
-          <a href="#explore">Explore</a>
           <a href="#products">Products</a>
+          <a href="#customize">Customize</a>
+          <a href="#preview">Preview</a>
           <a href="#checkout">Checkout</a>
           <a href="#trust">Privacy</a>
         </nav>

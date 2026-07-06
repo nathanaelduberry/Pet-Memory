@@ -64,15 +64,31 @@ describe('PetMemory living memory garden experience', () => {
     expect(screen.getByRole('heading', { name: /checkout preview/i })).toBeInTheDocument();
   });
 
+  it('presents the main features as separate page-like areas', () => {
+    render(<App />);
+
+    expect(screen.getByRole('link', { name: /^studio$/i })).toHaveAttribute('href', '#studio');
+    expect(screen.getByRole('link', { name: /^products$/i })).toHaveAttribute('href', '#products');
+    expect(screen.getByRole('link', { name: /^customize$/i })).toHaveAttribute('href', '#customize');
+    expect(screen.getByRole('link', { name: /^preview$/i })).toHaveAttribute('href', '#preview');
+    expect(screen.getByRole('link', { name: /^checkout$/i })).toHaveAttribute('href', '#checkout');
+  });
+
   it('shows products with prices and a checkout path while preserving the dropship handoff', () => {
     render(<App />);
 
     expect(screen.getByRole('heading', { name: /garden marker/i })).toBeInTheDocument();
-    expect(screen.getByText(/£39/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/£39/i)[0]).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /framed memory plaque/i })).toBeInTheDocument();
-    expect(screen.getByText(/£59/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/£59/i)[0]).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /mini memorial stone/i })).toBeInTheDocument();
+    expect(screen.getAllByText(/£79/i)[0]).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /photo keepsake print/i })).toBeInTheDocument();
+    expect(screen.getAllByText(/£24/i)[0]).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /memory locket/i })).toBeInTheDocument();
+    expect(screen.getAllByText(/£49/i)[0]).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /urn plate/i })).toBeInTheDocument();
-    expect(screen.getByText(/£29/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/£29/i)[0]).toBeInTheDocument();
 
     const checkoutLinks = screen.getAllByRole('link', { name: /continue to dropship checkout/i });
     expect(checkoutLinks[0]).toHaveAttribute('href', expect.stringContaining('dropship.petmemory.app/order'));
@@ -89,6 +105,28 @@ describe('PetMemory living memory garden experience', () => {
 
     const keepsakeLinks = screen.getAllByRole('link', { name: /create a keepsake plaque/i });
     expect(keepsakeLinks[0]).toHaveAttribute('href', '#products');
+  });
+
+  it('has a minimal studio for memorial copy, tone, product customization, preview, and ordering', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    expect(screen.getByRole('heading', { name: /create studio/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/pet name/i)).toHaveValue('Bailey');
+    expect(screen.getByLabelText(/memorial message/i)).toHaveValue('A loyal friend, porch sunbather, and forever part of the family garden.');
+    expect(screen.getByLabelText(/tone/i)).toHaveValue('peaceful');
+
+    await user.clear(screen.getByLabelText(/pet name/i));
+    await user.type(screen.getByLabelText(/pet name/i), 'Milo');
+    await user.clear(screen.getByLabelText(/memorial message/i));
+    await user.type(screen.getByLabelText(/memorial message/i), 'Forever chasing sunlight in the hallway.');
+    await user.selectOptions(screen.getByLabelText(/tone/i), 'joyful');
+
+    expect(screen.getByRole('heading', { name: /live keepsake preview/i })).toBeInTheDocument();
+    expect(screen.getAllByText(/Milo/i)[0]).toBeInTheDocument();
+    expect(screen.getAllByText(/Forever chasing sunlight in the hallway/i)[0]).toBeInTheDocument();
+    expect(screen.getAllByText(/Joyful/i)[0]).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /review and order/i })).toHaveAttribute('href', '#checkout');
   });
 
   it('reassures families that memorials are private and owner-controlled', () => {

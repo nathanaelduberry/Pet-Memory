@@ -101,15 +101,36 @@ export const keepsakeProducts = [
     id: 'garden-marker',
     title: 'Garden Marker',
     price: '£39',
-    copy: 'Weather-safe marker for flower beds, trees, patios, or a favorite sunny spot.',
+    copy: 'Weather-safe paw-shaped marker for flower beds, trees, patios, or a favorite sunny spot.',
     product: 'garden-marker'
   },
   {
     id: 'framed-memory-plaque',
     title: 'Framed Memory Plaque',
     price: '£59',
-    copy: 'A warm indoor frame for mantels, shelves, or the place where their photo already lives.',
+    copy: 'A warm indoor plaque for mantels, shelves, or the place where their photo already lives.',
     product: 'framed-memory-plaque'
+  },
+  {
+    id: 'mini-memorial-stone',
+    title: 'Mini Memorial Stone',
+    price: '£79',
+    copy: 'A small pet-oriented remembrance stone for gardens, porches, and quiet outdoor corners.',
+    product: 'mini-memorial-stone'
+  },
+  {
+    id: 'photo-keepsake-print',
+    title: 'Photo Keepsake Print',
+    price: '£24',
+    copy: 'A simple printed portrait with their name, dates, and a tiny QR link back to the memorial.',
+    product: 'photo-keepsake-print'
+  },
+  {
+    id: 'memory-locket',
+    title: 'Memory Locket',
+    price: '£49',
+    copy: 'A gentle jewellery keepsake for carrying their photo, pawprint, or memorial QR close.',
+    product: 'memory-locket'
   },
   {
     id: 'urn-plate',
@@ -120,11 +141,11 @@ export const keepsakeProducts = [
   }
 ];
 
-export function buildDropshipUrl(product = 'garden-marker-urn-plate-framed-plaque') {
+export function buildDropshipUrl(product = 'garden-marker-urn-plate-framed-plaque', petName = sampleMemorial.name) {
   const params = new URLSearchParams({
     source: 'petmemory',
     dropship: 'qr-memorial-plaque',
-    petName: sampleMemorial.name,
+    petName,
     memorialUrl: `https://nathanaelduberry.github.io/Pet-Memory/#memorial-${sampleMemorial.slug}`,
     product,
     qrCode: `https://nathanaelduberry.github.io/Pet-Memory/#memorial-${sampleMemorial.slug}`
