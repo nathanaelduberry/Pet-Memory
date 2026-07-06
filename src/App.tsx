@@ -4,12 +4,10 @@ import WaysToRemember from './components/WaysToRemember';
 import MemoryGardenTimeline from './components/MemoryGardenTimeline';
 import KeepsakePlaqueSection from './components/KeepsakePlaqueSection';
 import PrivacyTrustSection from './components/PrivacyTrustSection';
+import ProductExperience from './components/ProductExperience';
 import FinalCta from './components/FinalCta';
-import { buildDropshipUrl } from './content/memorialContent';
 
 export default function App() {
-  const dropshipOrderUrl = buildDropshipUrl();
-
   return (
     <main className="site-shell">
       <header className="topbar" aria-label="PetMemory navigation">
@@ -18,15 +16,15 @@ export default function App() {
           <span>PetMemory</span>
         </a>
         <nav className="nav-links" aria-label="Primary navigation">
-          <a href="#ways">Remember</a>
-          <a href="#memorial">Memorial</a>
-          <a href="#garden">Garden</a>
+          <a href="#studio">Studio</a>
+          <a href="#explore">Explore</a>
+          <a href="#products">Products</a>
+          <a href="#checkout">Checkout</a>
           <a href="#trust">Privacy</a>
-          <a href="#keepsake">Keepsakes</a>
         </nav>
       </header>
 
-      <Hero dropshipOrderUrl={dropshipOrderUrl} />
+      <Hero />
 
       <section id="memorial" className="section-block intro-section">
         <div className="section-heading split-heading">
@@ -41,9 +39,10 @@ export default function App() {
       </section>
 
       <WaysToRemember />
+      <ProductExperience />
       <MemoryGardenTimeline />
       <PrivacyTrustSection />
-      <KeepsakePlaqueSection dropshipOrderUrl={dropshipOrderUrl} />
+      <KeepsakePlaqueSection />
       <FinalCta />
     </main>
   );

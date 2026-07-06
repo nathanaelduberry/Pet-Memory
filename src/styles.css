@@ -525,6 +525,10 @@
 
   .intro-section,
   .trust-section,
+  .studio-section,
+  .explore-section,
+  .products-section,
+  .checkout-section,
   .final-cta {
     background:
       linear-gradient(135deg, rgba(255, 252, 245, 0.9), rgba(238, 242, 223, 0.68)),
@@ -551,6 +555,66 @@
     color: #5f835d;
   }
 
+  .journey-grid,
+  .garden-grid,
+  .product-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .journey-grid article,
+  .garden-grid article,
+  .product-card,
+  .checkout-card {
+    padding: 22px;
+    border-radius: 26px;
+    background: rgba(255, 250, 240, 0.84);
+    border: 1px solid rgba(122, 92, 58, 0.13);
+    box-shadow: 0 18px 45px rgba(64, 44, 26, 0.07);
+  }
+
+  .journey-grid article span,
+  .checkout-card span,
+  .price {
+    display: inline-flex;
+    width: fit-content;
+    margin-bottom: 12px;
+    padding: 8px 11px;
+    border-radius: 999px;
+    background: #efe0c5;
+    color: #7d5a31;
+    font-weight: 950;
+  }
+
+  .garden-grid article,
+  .product-card {
+    display: grid;
+    gap: 10px;
+  }
+
+  .garden-grid svg,
+  .product-card svg {
+    color: #5f835d;
+  }
+
+  .product-card .button {
+    width: fit-content;
+    margin-top: 8px;
+  }
+
+  .checkout-section {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 24px;
+    align-items: center;
+  }
+
+  .checkout-card {
+    display: grid;
+    gap: 12px;
+  }
+
   .final-cta {
     text-align: center;
     display: grid;
@@ -566,6 +630,7 @@
   @media (max-width: 900px) {
     .hero-section,
     .plaque-section,
+    .checkout-section,
     .timeline-layout,
     .split-heading {
       grid-template-columns: 1fr;
@@ -574,7 +639,10 @@
 
     .feature-grid,
     .memory-grid,
-    .trust-grid {
+    .trust-grid,
+    .journey-grid,
+    .garden-grid,
+    .product-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
@@ -585,7 +653,10 @@
     .nav-links { flex-wrap: wrap; }
     .feature-grid,
     .memory-grid,
-    .trust-grid { grid-template-columns: 1fr; }
+    .trust-grid,
+    .journey-grid,
+    .garden-grid,
+    .product-grid { grid-template-columns: 1fr; }
     .stat-row { flex-direction: column; align-items: stretch; }
     h1 { font-size: clamp(3.4rem, 20vw, 5rem); }
   }

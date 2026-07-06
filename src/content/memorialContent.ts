@@ -84,13 +84,49 @@ export const trustPromises = [
   'Edit and add memories over time'
 ];
 
-export function buildDropshipUrl() {
+export const studioSteps = [
+  'Name, photo, story, moments, privacy, and invitations',
+  'Choose a tone: peaceful, joyful, funny, grateful, or goodbye',
+  'Invite family after the first memory is saved'
+];
+
+export const exploreGardens = [
+  { title: 'Dog garden', copy: 'Loyal companions, porch watchers, hiking partners, and sofa guardians.' },
+  { title: 'Cat garden', copy: 'Window kings, blanket queens, quiet shadows, and impossible little comedians.' },
+  { title: 'Small friends', copy: 'Rabbits, birds, hamsters, reptiles, horses, and every creature who became family.' }
+];
+
+export const keepsakeProducts = [
+  {
+    id: 'garden-marker',
+    title: 'Garden Marker',
+    price: '£39',
+    copy: 'Weather-safe marker for flower beds, trees, patios, or a favorite sunny spot.',
+    product: 'garden-marker'
+  },
+  {
+    id: 'framed-memory-plaque',
+    title: 'Framed Memory Plaque',
+    price: '£59',
+    copy: 'A warm indoor frame for mantels, shelves, or the place where their photo already lives.',
+    product: 'framed-memory-plaque'
+  },
+  {
+    id: 'urn-plate',
+    title: 'Urn Plate',
+    price: '£29',
+    copy: 'A smaller plate designed to sit beside an urn, collar, paw cast, or keepsake box.',
+    product: 'urn-plate'
+  }
+];
+
+export function buildDropshipUrl(product = 'garden-marker-urn-plate-framed-plaque') {
   const params = new URLSearchParams({
     source: 'petmemory',
     dropship: 'qr-memorial-plaque',
     petName: sampleMemorial.name,
     memorialUrl: `https://nathanaelduberry.github.io/Pet-Memory/#memorial-${sampleMemorial.slug}`,
-    product: 'garden-marker-urn-plate-framed-plaque',
+    product,
     qrCode: `https://nathanaelduberry.github.io/Pet-Memory/#memorial-${sampleMemorial.slug}`
   });
 

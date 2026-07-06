@@ -9,7 +9,7 @@ export default function FinalCta() {
       <p>
         The memorial does not need to be complete today. Start gently, invite others later, and let their story grow at the pace your heart can manage.
       </p>
-      <a className="button primary" href="#top">{primaryActions.begin}</a>
+      <a className="button primary" href="#studio">{primaryActions.begin}</a>
     </section>
   );
 }

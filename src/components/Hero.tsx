@@ -2,11 +2,7 @@ import { PawPrint, Sparkles } from 'lucide-react';
 import { heroCopy, primaryActions } from '../content/memorialContent';
 import MemorialPreviewCard from './MemorialPreviewCard';
 
-type HeroProps = {
-  dropshipOrderUrl: string;
-};
-
-export default function Hero({ dropshipOrderUrl }: HeroProps) {
+export default function Hero() {
   return (
     <section id="top" className="hero-section sanctuary-hero">
       <div className="hero-copy">
@@ -14,9 +10,9 @@ export default function Hero({ dropshipOrderUrl }: HeroProps) {
         <h1>{heroCopy.title}</h1>
         <p className="hero-lede">{heroCopy.lede}</p>
         <div className="hero-actions" aria-label="Primary actions">
-          <a className="button primary" href="#begin">{primaryActions.begin}</a>
-          <a className="button secondary" href="#memorial">{primaryActions.visit}</a>
-          <a className="button ghost" href={dropshipOrderUrl} target="_blank" rel="noopener noreferrer">
+          <a className="button primary" href="#studio">{primaryActions.begin}</a>
+          <a className="button secondary" href="#explore">{primaryActions.visit}</a>
+          <a className="button ghost" href="#products">
             {primaryActions.keepsake}
           </a>
         </div>

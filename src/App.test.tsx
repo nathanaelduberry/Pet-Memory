@@ -24,12 +24,14 @@ describe('PetMemory living memory garden experience', () => {
     expect(screen.getByText(/give all that love somewhere gentle to live/i)).toBeInTheDocument();
   });
 
-  it('uses gentle user-facing calls to action', () => {
+  it('uses gentle user-facing calls to action and navigation into distinct areas', () => {
     render(<App />);
 
-    expect(screen.getAllByRole('link', { name: /begin their memorial/i })[0]).toHaveAttribute('href', '#begin');
-    expect(screen.getByRole('link', { name: /visit memorials/i })).toHaveAttribute('href', '#memorial');
-    expect(screen.getAllByRole('link', { name: /create a keepsake plaque/i })[0]).toHaveAttribute('href', expect.stringContaining('dropship'));
+    expect(screen.getAllByRole('link', { name: /begin their memorial/i })[0]).toHaveAttribute('href', '#studio');
+    expect(screen.getByRole('link', { name: /visit memorials/i })).toHaveAttribute('href', '#explore');
+    expect(screen.getAllByRole('link', { name: /create a keepsake plaque/i })[0]).toHaveAttribute('href', '#products');
+    expect(screen.getByRole('link', { name: /products/i })).toHaveAttribute('href', '#products');
+    expect(screen.getByRole('link', { name: /^checkout$/i })).toHaveAttribute('href', '#checkout');
   });
 
   it('explains the ways people can remember without internal product language', () => {
@@ -51,6 +53,34 @@ describe('PetMemory living memory garden experience', () => {
     expect(screen.getByText(/family and friends can add the memories only they carry/i)).toBeInTheDocument();
   });
 
+  it('turns the site into a multi-area product experience', () => {
+    render(<App />);
+
+    expect(screen.getByRole('heading', { name: /memorial studio/i })).toBeInTheDocument();
+    expect(screen.getByText(/name, photo, story, moments, privacy, and invitations/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /explore the memory garden/i })).toBeInTheDocument();
+    expect(screen.getByText(/browse public memorials, species gardens, and community rituals/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /keepsake shop/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /checkout preview/i })).toBeInTheDocument();
+  });
+
+  it('shows products with prices and a checkout path while preserving the dropship handoff', () => {
+    render(<App />);
+
+    expect(screen.getByRole('heading', { name: /garden marker/i })).toBeInTheDocument();
+    expect(screen.getByText(/£39/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /framed memory plaque/i })).toBeInTheDocument();
+    expect(screen.getByText(/£59/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /urn plate/i })).toBeInTheDocument();
+    expect(screen.getByText(/£29/i)).toBeInTheDocument();
+
+    const checkoutLinks = screen.getAllByRole('link', { name: /continue to dropship checkout/i });
+    expect(checkoutLinks[0]).toHaveAttribute('href', expect.stringContaining('dropship.petmemory.app/order'));
+    expect(checkoutLinks[0]).toHaveAttribute('href', expect.stringContaining('product='));
+    expect(checkoutLinks[0]).toHaveAttribute('target', '_blank');
+    expect(checkoutLinks[0]).toHaveAttribute('rel', expect.stringContaining('noopener'));
+  });
+
   it('reframes plaques as keepsakes while preserving the dropship handoff', () => {
     render(<App />);
 
@@ -58,9 +88,7 @@ describe('PetMemory living memory garden experience', () => {
     expect(screen.getByText(/garden marker, urn plate, or framed plaque/i)).toBeInTheDocument();
 
     const keepsakeLinks = screen.getAllByRole('link', { name: /create a keepsake plaque/i });
-    expect(keepsakeLinks[0]).toHaveAttribute('href', expect.stringContaining('dropship'));
-    expect(keepsakeLinks[0]).toHaveAttribute('target', '_blank');
-    expect(keepsakeLinks[0]).toHaveAttribute('rel', expect.stringContaining('noopener'));
+    expect(keepsakeLinks[0]).toHaveAttribute('href', '#products');
   });
 
   it('reassures families that memorials are private and owner-controlled', () => {
