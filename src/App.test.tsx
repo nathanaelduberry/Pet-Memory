@@ -1,7 +1,19 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import App from './App';
 
 describe('PetMemory landing experience', () => {
+  beforeEach(() => {
+    vi.stubGlobal('URL', {
+      createObjectURL: vi.fn(() => 'blob:pet-photo-preview'),
+      revokeObjectURL: vi.fn()
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it('positions PetMemory as a pet-oriented sister product to Memoria', () => {
     render(<App />);
 
@@ -19,11 +31,41 @@ describe('PetMemory landing experience', () => {
     expect(screen.getByRole('heading', { name: /memorial plaques/i })).toBeInTheDocument();
   });
 
-  it('includes primary calls to create, browse, and order a plaque', () => {
+  it('connects the memorial plaque order button to a dropship handoff URL', () => {
     render(<App />);
 
-    expect(screen.getByRole('link', { name: /create a memorial/i })).toHaveAttribute('href', '#create');
-    expect(screen.getByRole('link', { name: /browse memorials/i })).toHaveAttribute('href', '#browse');
-    expect(screen.getByRole('link', { name: /order a memorial plaque/i })).toHaveAttribute('href', '#plaque');
+    const plaqueLinks = screen.getAllByRole('link', { name: /order a memorial plaque/i });
+    expect(plaqueLinks[0]).toHaveAttribute('href', expect.stringContaining('dropship'));
+    expect(plaqueLinks[0]).toHaveAttribute('target', '_blank');
+    expect(plaqueLinks[0]).toHaveAttribute('rel', expect.stringContaining('noopener'));
+  });
+
+  it('previews uploaded pet photos immediately and revokes the blob when replaced', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    const upload = screen.getByLabelText(/upload pet photo/i);
+    const firstFile = new File(['first'], 'first-pet.png', { type: 'image/png' });
+    await user.upload(upload, firstFile);
+
+    const preview = screen.getByRole('img', { name: /uploaded pet preview/i });
+    expect(preview).toHaveAttribute('src', 'blob:pet-photo-preview');
+    expect(screen.getByText(/first-pet.png/i)).toBeInTheDocument();
+    expect(URL.createObjectURL).toHaveBeenCalledWith(firstFile);
+
+    const secondFile = new File(['second'], 'second-pet.jpg', { type: 'image/jpeg' });
+    await user.upload(upload, secondFile);
+
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:pet-photo-preview');
+    expect(screen.getByText(/second-pet.jpg/i)).toBeInTheDocument();
+  });
+
+  it('adds timeline moments and respect activity to memorial profile cards', () => {
+    render(<App />);
+
+    expect(screen.getByRole('heading', { name: /bailey's timeline/i })).toBeInTheDocument();
+    expect(screen.getByText(/first beach day/i)).toBeInTheDocument();
+    expect(screen.getByText(/latest respect/i)).toBeInTheDocument();
+    expect(screen.getByText(/left a flower/i)).toBeInTheDocument();
   });
 });
