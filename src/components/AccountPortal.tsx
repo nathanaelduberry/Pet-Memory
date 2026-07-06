@@ -1,4 +1,5 @@
 import { KeyRound, PawPrint, ShoppingBasket, Sparkles, UserRound } from 'lucide-react';
+import { isSupabaseConfigured, supabaseProjectUrl } from '../lib/supabase';
 
 const portalPets = [
   {
@@ -43,7 +44,11 @@ export default function AccountPortal() {
             <button className="button primary" type="button">Sign in</button>
             <button className="button secondary" type="button">Create account</button>
           </div>
-          <p className="portal-note">Supabase auth can connect here when the project URL and anon key are added.</p>
+          <p className="portal-note">
+            {isSupabaseConfigured
+              ? `Connected to Supabase project: ${supabaseProjectUrl}`
+              : `Supabase project URL saved: ${supabaseProjectUrl}. Add the anon public key to make sign in live.`}
+          </p>
         </form>
 
         <div className="portal-dashboard" aria-label="Personalized account preview">
