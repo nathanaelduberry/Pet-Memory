@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState, type ChangeEvent } from 'react';
 import { Camera, ChevronLeft, Heart, LockKeyhole, PawPrint, Share2, ShoppingBag, Sparkles, UploadCloud } from 'lucide-react';
 import AccountPortal from './components/AccountPortal';
 
+type RouteName = 'social' | 'memorials' | 'keepsakes' | 'signin' | 'post' | 'checkout' | 'customize';
+
 type Product = {
   id: string;
   name: string;
@@ -75,55 +77,67 @@ const moments = [
 ];
 
 const formatCurrency = (value: number) => `$${value.toFixed(0)}`;
+const routeHref = (route: string) => `#/${route}`;
 
-function DesktopLanding() {
+function getRouteFromHash(): { route: RouteName; productId?: string } {
+  const clean = window.location.hash.replace(/^#\/?/, '') || 'social';
+  const [route, productId] = clean.split('/');
+  if (route === 'customize') return { route: 'customize', productId };
+  if (['social', 'memorials', 'keepsakes', 'signin', 'post', 'checkout'].includes(route)) return { route: route as RouteName };
+  return { route: 'social' };
+}
+
+function AppHeader({ route }: { route: RouteName }) {
+  const tabs: Array<[RouteName, string]> = [
+    ['social', 'Social'],
+    ['memorials', 'Memorials'],
+    ['keepsakes', 'Keepsakes'],
+    ['signin', 'Sign In']
+  ];
+
   return (
-    <section id="top" className="premium-shell" aria-label="PetMemory premium keepsake home">
-      <header className="premium-nav">
-        <a className="premium-brand" href="#top" aria-label="PetMemory home">
-          <span className="brand-dot" />
-          <span>PetMemory</span>
-        </a>
-        <nav className="premium-links" aria-label="Primary navigation">
-          <a href="#collection">The Collection</a>
-          <a href="#inventory">Inventory</a>
-          <a href="#customize/oakford-plaque">Studio</a>
-          <a href="#checkout">Checkout</a>
-          <a href="#account">Sign in</a>
-        </nav>
-        <a className="outline-pill" href="#customize/oakford-plaque">Begin a memorial</a>
-      </header>
+    <header className="premium-nav app-header">
+      <a className="premium-brand" href={routeHref('social')} aria-label="PetMemory home">
+        <span className="brand-dot" />
+        <span>PetMemory</span>
+      </a>
+      <nav className="premium-links" aria-label="Primary navigation">
+        {tabs.map(([tab, label]) => <a key={tab} className={route === tab ? 'active-tab' : ''} href={routeHref(tab)}>{label}</a>)}
+      </nav>
+      <a className="outline-pill" href={routeHref('post')}>Post</a>
+    </header>
+  );
+}
 
-      <div className="premium-hero">
+function SocialPage() {
+  return (
+    <section className="premium-shell page-shell social-page" aria-label="PetMemory social feed">
+      <div className="premium-hero social-hero">
         <div className="hero-copy">
-          <p className="gold-eyebrow">Handcrafted remembrance</p>
-          <h1>A memorial worthy of a life well loved.</h1>
-          <p className="hero-text">Preserve their story online, then hold it in your hands — plaques and portraits cast, engraved, and finished by hand.</p>
+          <p className="gold-eyebrow">Social</p>
+          <h1>A gentle place to post, remember, and support.</h1>
+          <p className="hero-text">Share everyday pet updates or create a memorial post. Every post can become a timeline moment, a respect thread, or the start of a keepsake.</p>
           <div className="hero-actions">
-            <a className="gold-button" href="#inventory">Explore the collection</a>
-            <a className="dark-button" href="#account">Create a profile</a>
+            <a className="gold-button" href={routeHref('post')}>Post</a>
+            <a className="dark-button" href={routeHref('memorials')}>View memorials</a>
           </div>
-          <div className="proof-row">
-            {heroProof.map(([value, label]) => (
-              <div key={value}><strong>{value}</strong><span>{label}</span></div>
-            ))}
-          </div>
+          <div className="proof-row">{heroProof.map(([value, label]) => <div key={value}><strong>{value}</strong><span>{label}</span></div>)}</div>
         </div>
-        <div className="plaque-hero" aria-label="The Oakford Plaque preview">
-          <img src="https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=1200&q=80" alt="Golden retriever memorial portrait placeholder" />
-          <div className="plaque-float"><strong>The Oakford Plaque</strong><span>Bronze on oak · from $98</span></div>
+        <div className="social-feed-card">
+          <article className="post-card featured"><span>Memorial post</span><h2>Biscuit's porch naps</h2><p>Thirteen years of muddy paws, kind eyes, and perfect mornings.</p><small>82 respects · 12 timeline moments</small></article>
+          <article className="post-card"><span>General post</span><h3>Sunny walk in the park</h3><p>Upload photos, add a story, then categorize it when posting.</p></article>
         </div>
       </div>
     </section>
   );
 }
 
-function CollectionSection() {
+function CollectionSection({ onAdd }: { onAdd: (product: Product) => void }) {
   return (
-    <section id="collection" className="collection-section">
+    <section className="collection-section page-section">
       <div className="section-title-row">
         <div><p className="brown-eyebrow">The Collection</p><h2>Keepsakes made to last</h2></div>
-        <a href="#inventory">All keepsakes →</a>
+        <a href={routeHref('checkout')}>Basket / checkout →</a>
       </div>
       <div className="product-grid">
         {products.map((product) => (
@@ -132,7 +146,8 @@ function CollectionSection() {
             <div className="product-body">
               <h3>{product.name}</h3>
               <p>{product.description}</p>
-              <div className="product-action-row"><strong>from {product.priceLabel}</strong><a href={`#customize/${product.id}`}>Customize</a></div>
+              <div className="product-action-row"><strong>from {product.priceLabel}</strong><a href={`#/customize/${product.id}`}>Customize</a></div>
+              <button className="inline-basket-button" type="button" onClick={() => onAdd(product)}>Add to basket</button>
             </div>
           </article>
         ))}
@@ -143,15 +158,15 @@ function CollectionSection() {
 
 function HowItWorks() {
   return (
-    <section id="how-it-works" className="how-section">
+    <section className="how-section page-section">
       <p className="brown-eyebrow">How it works</p>
       <div className="steps-grid">
         {[
-          ['1', 'Create their profile', 'Name, dates, story, privacy, photos, videos, and invitations.'],
-          ['2', 'Add timeline moments', 'Save dates, times, memories, media, and respect notes.'],
-          ['3', 'Customize the keepsake', 'Choose material, finish, engraving, portrait crop, and gift note.'],
-          ['4', 'Checkout white-label', 'Guests can order immediately; signed-in families can save everything.']
-        ].map(([num, title, text]) => (<article className="step-card" key={num}><span>{num}</span><h3>{title}</h3><p>{text}</p></article>))}
+          ['1', 'Post', 'Choose memorial or general post, import media, and save the story.'],
+          ['2', 'Memorialize', 'Turn moments into a profile with dates, timeline, respects, photos, and videos.'],
+          ['3', 'Customize', 'Choose material, finish, engraving, portrait crop, and gift note.'],
+          ['4', 'Checkout', 'Guests can order immediately; signed-in families can save everything.']
+        ].map(([num, title, text]) => <article className="step-card" key={num}><span>{num}</span><h3>{title}</h3><p>{text}</p></article>)}
       </div>
     </section>
   );
@@ -159,17 +174,17 @@ function HowItWorks() {
 
 function MobileMemorialProfile() {
   return (
-    <section id="memorial-profile" className="mobile-showcase" aria-label="Mobile memorial profile layout">
-      <div className="mobile-showcase-copy"><p className="gold-eyebrow">Mobile memorial profile</p><h2>Timeline moments and respects live on the memorial card.</h2><p>Design 1g becomes the phone-first experience: photo, life dates, story, timeline, respect buttons, and sharing in one warm profile.</p></div>
+    <section className="mobile-showcase page-section" aria-label="Mobile memorial profile layout">
+      <div className="mobile-showcase-copy"><p className="gold-eyebrow">Memorials</p><h2>Timeline moments and respects live on the memorial card.</h2><p>Photo, life dates, story, timeline, respect buttons, and sharing in one warm profile.</p></div>
       <div className="phone-frame">
         <div className="phone-screen">
           <div className="phone-notch" />
-          <div className="mobile-photo"><div className="mobile-status"><span>9:41</span><span>● ● ● ▂▃▅ ▮</span></div><a className="round-icon left" href="#top" aria-label="Back"><ChevronLeft size={18} /></a><button className="round-icon right" aria-label="Share memorial"><Share2 size={14} /></button><span className="memory-label">In loving memory</span></div>
+          <div className="mobile-photo"><div className="mobile-status"><span>9:41</span><span>● ● ● ▂▃▅ ▮</span></div><a className="round-icon left" href={routeHref('social')} aria-label="Back"><ChevronLeft size={18} /></a><button className="round-icon right" aria-label="Share memorial"><Share2 size={14} /></button><span className="memory-label">In loving memory</span></div>
           <div className="mobile-content">
             <div className="pet-heading-row"><div><h2>Biscuit</h2><p>Golden retriever · Portland, OR</p></div><strong>2011 —<br />2024</strong></div>
             <p className="pet-story">The best napper on the porch and greeter of every guest. Thirteen years of muddy paws and perfect mornings.</p>
             <div className="mobile-actions"><button>Leave a respect</button><button>Share</button></div>
-            <div className="timeline-mini"><h3>Timeline · 12 moments</h3><div className="timeline-rail">{moments.map((moment) => (<article className={`moment-row ${moment.color}`} key={moment.title}><span className="moment-dot" /><img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=220&q=80" alt="Pet memory thumbnail" /><div><strong>{moment.title}</strong><span>{moment.date}</span></div></article>))}</div></div>
+            <div className="timeline-mini"><h3>Timeline · 12 moments</h3><div className="timeline-rail">{moments.map((moment) => <article className={`moment-row ${moment.color}`} key={moment.title}><span className="moment-dot" /><img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=220&q=80" alt="Pet memory thumbnail" /><div><strong>{moment.title}</strong><span>{moment.date}</span></div></article>)}</div></div>
             <div className="respect-summary"><h3>Respects · 82</h3><div className="respect-grid"><article><span>🕯</span><strong>24</strong><small>Candles</small></article><article><span>🌼</span><strong>18</strong><small>Flowers</small></article><article><span>🐾</span><strong>40</strong><small>Pawprints</small></article></div></div>
           </div>
         </div>
@@ -178,51 +193,37 @@ function MobileMemorialProfile() {
   );
 }
 
-function BuilderPreview() {
-  const [previewUrl, setPreviewUrl] = useState('');
-  const [fileName, setFileName] = useState('No photo selected yet');
-
-  useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl); }, [previewUrl]);
-
-  const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    const nextPreview = URL.createObjectURL(file);
-    setPreviewUrl(nextPreview);
-    setFileName(file.name);
-  };
-
+function MemorialsPage() {
   return (
-    <section id="studio" className="builder-section">
-      <div className="section-title-row"><div><p className="brown-eyebrow"><Camera size={14} /> Photo upload preview</p><h2>Attach the photo, story, timeline, and keepsake in one flow.</h2></div><p>Structure follows the mobile profile direction: image first, then life dates, story, moments, respects, and order-ready keepsakes.</p></div>
-      <div className="upload-panel"><label>Add their photo<input type="file" accept="image/*" onChange={handlePhotoChange} /></label><div className="upload-preview">{previewUrl ? <img src={previewUrl} alt="Uploaded pet preview" /> : <span>Photo preview appears here</span>}</div><p>{fileName}</p></div>
-      <div className="builder-grid"><article><LockKeyhole size={22} /><h3>Private by default</h3><p>Profiles save to the signed-in owner. Public memorials can be shared when the family chooses.</p></article><article><Heart size={22} /><h3>Timeline + respects</h3><p>Moments and respects are designed into the memorial card instead of buried elsewhere.</p></article><article><ShoppingBag size={22} /><h3>Order-ready basket</h3><p>Customize buttons now open the in-app item builder and white-label checkout.</p></article></div>
-    </section>
+    <>
+      <MobileMemorialProfile />
+      <section className="builder-section page-section">
+        <div className="section-title-row"><div><p className="brown-eyebrow"><Camera size={14} /> Memorial builder</p><h2>Create profiles that can be deep-linked and expanded.</h2></div><a href={routeHref('post')}>Create memorial post →</a></div>
+        <div className="builder-grid"><article><LockKeyhole size={22} /><h3>Private by default</h3><p>Profiles save to the signed-in owner. Public memorials can be shared when the family chooses.</p></article><article><Heart size={22} /><h3>Timeline + respects</h3><p>Moments and respects are designed into the memorial card instead of buried elsewhere.</p></article><article><ShoppingBag size={22} /><h3>Keepsake ready</h3><p>Any memorial can be sent into the keepsake customizer and checkout.</p></article></div>
+      </section>
+    </>
   );
 }
 
-function CommerceExperience() {
-  const [basket, setBasket] = useState<BasketLine[]>(() => {
-    try { return JSON.parse(localStorage.getItem('petmemory-basket') || '[]') as BasketLine[]; } catch { return []; }
-  });
+function KeepsakesPage({ onAdd }: { onAdd: (product: Product) => void }) {
+  return <><CollectionSection onAdd={onAdd} /><HowItWorks /></>;
+}
+
+function CustomizerPage({ productId, onAdd }: { productId?: string; onAdd: (product: Product, petName: string, finish: string) => void }) {
+  const product = products.find((item) => item.id === productId) ?? products[0];
   const [petName, setPetName] = useState('Biscuit');
   const [lifeDates, setLifeDates] = useState('2011 - 2024');
   const [favoriteMemory, setFavoriteMemory] = useState('Porch naps, muddy paws, and morning walks.');
   const [momentDate, setMomentDate] = useState('');
   const [momentTime, setMomentTime] = useState('');
-  const [finish, setFinish] = useState('Bronze on oak');
+  const [finish, setFinish] = useState(product.material);
   const [engraving, setEngraving] = useState('Forever loved, forever home.');
   const [photoName, setPhotoName] = useState('No memorial photo imported yet');
   const [videoName, setVideoName] = useState('No memorial video imported yet');
   const [photoPreview, setPhotoPreview] = useState('');
 
-  useEffect(() => { localStorage.setItem('petmemory-basket', JSON.stringify(basket)); }, [basket]);
+  useEffect(() => { setFinish(product.material); }, [product.material]);
   useEffect(() => () => { if (photoPreview) URL.revokeObjectURL(photoPreview); }, [photoPreview]);
-
-  const subtotal = useMemo(() => basket.reduce((sum, item) => sum + item.price, 0), [basket]);
-  const shipping = basket.length ? 9 : 0;
-  const total = subtotal + shipping;
 
   const importPhoto = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -231,107 +232,101 @@ function CommerceExperience() {
     setPhotoPreview(URL.createObjectURL(file));
     setPhotoName(file.name);
   };
-
   const importVideo = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
-    setVideoName(file.name);
-  };
-
-  const addToBasket = (product: Product) => {
-    setBasket((current) => [...current, { id: `${product.id}-${Date.now()}`, productName: product.name, price: product.price, petName, finish }]);
+    if (file) setVideoName(file.name);
   };
 
   return (
-    <section id="inventory" className="commerce-section">
-      <div className="section-title-row">
-        <div><p className="brown-eyebrow"><ShoppingBag size={14} /> Inventory</p><h2>Inventory memorials</h2><p>Itemized memorials to be purchased</p></div>
-        <p>Choose the keepsake, customize the pet story, import media, then complete guest checkout or sign in to save everything.</p>
-      </div>
-
-      <div className="inventory-grid">
-        {products.map((product) => (
-          <article className="inventory-card" key={product.id} id={`customize/${product.id}`}>
-            <img src={product.image} alt={`${product.plainName} inventory preview`} />
-            <div>
-              <p className="brown-eyebrow">{product.plainName}</p>
-              <h3>Customize {product.name}</h3>
-              <p>{product.description}</p>
-              <dl>
-                <div><dt>Material</dt><dd>{product.material}</dd></div>
-                <div><dt>Lead time</dt><dd>{product.turnaround}</dd></div>
-                <div><dt>Base price</dt><dd>{product.priceLabel}</dd></div>
-              </dl>
-              <ul>{product.includes.map((item) => <li key={item}>{item}</li>)}</ul>
-              <div className="inventory-actions"><a href={`#customize/${product.id}`}>Customize</a><button type="button" onClick={() => addToBasket(product)}>Add to basket</button></div>
-            </div>
-          </article>
-        ))}
-      </div>
-
+    <section className="commerce-section page-section">
+      <div className="section-title-row"><div><p className="brown-eyebrow"><UploadCloud size={14} /> Personalization studio</p><h2>Customize {product.name}</h2></div><a href={routeHref('keepsakes')}>Back to keepsakes →</a></div>
+      <article className="inventory-card product-detail-card"><img src={product.image} alt={`${product.plainName} inventory preview`} /><div><p className="brown-eyebrow">{product.plainName}</p><h3>{product.name}</h3><p>{product.description}</p><dl><div><dt>Material</dt><dd>{product.material}</dd></div><div><dt>Lead time</dt><dd>{product.turnaround}</dd></div><div><dt>Base price</dt><dd>{product.priceLabel}</dd></div></dl><ul>{product.includes.map((item) => <li key={item}>{item}</li>)}</ul></div></article>
       <div className="custom-checkout-grid">
-        <form className="customizer-panel" id="customize/oakford-plaque">
-          <p className="brown-eyebrow"><UploadCloud size={14} /> Personalization studio</p>
-          <h2>Customize The Oakford Plaque</h2>
+        <form className="customizer-panel">
           <div className="form-grid">
             <label>Pet name<input value={petName} onChange={(event) => setPetName(event.target.value)} /></label>
             <label>Life dates<input value={lifeDates} onChange={(event) => setLifeDates(event.target.value)} placeholder="2015 - 2026" /></label>
             <label>Moment date<input type="date" value={momentDate} onChange={(event) => setMomentDate(event.target.value)} /></label>
             <label>Moment time<input type="time" value={momentTime} onChange={(event) => setMomentTime(event.target.value)} /></label>
-            <label>Finish<select value={finish} onChange={(event) => setFinish(event.target.value)}><option>Bronze on oak</option><option>Walnut frame</option><option>Garden stone</option><option>Matte black plate</option></select></label>
+            <label>Finish<select value={finish} onChange={(event) => setFinish(event.target.value)}><option>{product.material}</option><option>Walnut frame</option><option>Garden stone</option><option>Matte black plate</option></select></label>
             <label>Engraving<input value={engraving} onChange={(event) => setEngraving(event.target.value)} /></label>
           </div>
           <label>Favorite memory<textarea value={favoriteMemory} onChange={(event) => setFavoriteMemory(event.target.value)} /></label>
-          <div className="media-imports">
-            <label>Import memorial photo<input type="file" accept="image/*" onChange={importPhoto} /></label>
-            <label>Import memorial video<input type="file" accept="video/*" onChange={importVideo} /></label>
-          </div>
+          <div className="media-imports"><label>Import memorial photo<input type="file" accept="image/*" onChange={importPhoto} /></label><label>Import memorial video<input type="file" accept="video/*" onChange={importVideo} /></label></div>
         </form>
-
-        <aside className="live-order-card">
-          <p className="brown-eyebrow">Live preview</p>
-          <div className="order-photo-preview">{photoPreview ? <img src={photoPreview} alt="Custom memorial photo preview" /> : <span>Import a photo to preview it here</span>}</div>
-          <h3>Preview: {petName || 'Pet name'}</h3>
-          <p>{lifeDates}</p>
-          <p>{favoriteMemory}</p>
-          <p>{momentDate}{momentTime ? ` · ${momentTime}` : ''}</p>
-          <strong>{finish}</strong>
-          <small>{engraving}</small>
-          <small>{photoName}</small>
-          <small>{videoName}</small>
-          <button type="button" onClick={() => addToBasket(products[0])}>Add customized plaque to basket</button>
-        </aside>
+        <aside className="live-order-card"><p className="brown-eyebrow">Live preview</p><div className="order-photo-preview">{photoPreview ? <img src={photoPreview} alt="Custom memorial photo preview" /> : <span>Import a photo to preview it here</span>}</div><h3>Preview: {petName || 'Pet name'}</h3><p>{lifeDates}</p><p>{favoriteMemory}</p><p>{momentDate}{momentTime ? ` · ${momentTime}` : ''}</p><strong>{finish}</strong><small>{engraving}</small><small>{photoName}</small><small>{videoName}</small><button type="button" onClick={() => onAdd(product, petName, finish)}>Add customized item to basket</button><a className="cream-button" href={routeHref('checkout')}>Go to checkout</a></aside>
       </div>
+    </section>
+  );
+}
 
-      <section className="checkout-panel" id="checkout">
+function CheckoutPage({ basket }: { basket: BasketLine[] }) {
+  const subtotal = useMemo(() => basket.reduce((sum, item) => sum + item.price, 0), [basket]);
+  const shipping = basket.length ? 9 : 0;
+  const total = subtotal + shipping;
+  return (
+    <section className="commerce-section page-section">
+      <div className="checkout-panel stand-alone-checkout" id="checkout">
         <div><p className="brown-eyebrow">Basket · {basket.length} {basket.length === 1 ? 'item' : 'items'}</p><h2>White-label checkout</h2><p>Guest checkout available. Signed-in users can save this basket, media, dates, times, and memories to their PetMemory vault.</p></div>
-        <div className="basket-lines">
-          {basket.length === 0 ? <p>Your basket is empty. Add a memorial above.</p> : basket.map((item) => <article key={item.id}><strong>{item.productName}</strong><span>{item.petName} · {item.finish}</span><b>{formatCurrency(item.price)}</b></article>)}
-        </div>
-        <form className="guest-checkout">
-          <label>Guest email<input type="email" placeholder="you@example.com" /></label>
-          <label>Shipping name<input placeholder="Full name" /></label>
-          <label>Shipping address<textarea placeholder="Street, city, state, ZIP" /></label>
-          <label>Payment method<select><option>Card ending later</option><option>PayPal later</option><option>Invoice draft</option></select></label>
-          <div className="totals"><span>Subtotal {formatCurrency(subtotal)}</span><span>Shipping {formatCurrency(shipping)}</span><strong>Total {formatCurrency(total)}</strong></div>
-          <button type="button">Place white-label order</button>
+        <div className="basket-lines">{basket.length === 0 ? <p>Your basket is empty. Add a memorial from keepsakes.</p> : basket.map((item) => <article key={item.id}><strong>{item.productName}</strong><span>{item.petName} · {item.finish}</span><b>{formatCurrency(item.price)}</b></article>)}</div>
+        <form className="guest-checkout"><label>Guest email<input type="email" placeholder="you@example.com" /></label><label>Shipping name<input placeholder="Full name" /></label><label>Shipping address<textarea placeholder="Street, city, state, ZIP" /></label><label>Payment method<select><option>Card ending later</option><option>PayPal later</option><option>Invoice draft</option></select></label><div className="totals"><span>Subtotal {formatCurrency(subtotal)}</span><span>Shipping {formatCurrency(shipping)}</span><strong>Total {formatCurrency(total)}</strong></div><button type="button">Place white-label order</button></form>
+      </div>
+    </section>
+  );
+}
+
+function PostPage() {
+  const [category, setCategory] = useState<'memorial' | 'general'>('memorial');
+  const [postTitle, setPostTitle] = useState('');
+  const [postBody, setPostBody] = useState('');
+  const [photoName, setPhotoName] = useState('No picture imported yet');
+  const [videoName, setVideoName] = useState('No video imported yet');
+  return (
+    <section className="builder-section page-section post-page">
+      <div className="section-title-row"><div><p className="brown-eyebrow"><PawPrint size={14} /> Post</p><h2>Create a post, then choose memorial or general.</h2></div><p>Jordan's requested flow: the post feature lets the family categorize it as a memorial or a normal social post.</p></div>
+      <div className="custom-checkout-grid">
+        <form className="customizer-panel">
+          <label>Post category<select value={category} onChange={(event) => setCategory(event.target.value as 'memorial' | 'general')}><option value="memorial">Memorial</option><option value="general">General post</option></select></label>
+          <label>Post title<input value={postTitle} onChange={(event) => setPostTitle(event.target.value)} placeholder="Biscuit's best morning" /></label>
+          <label>Post memory<textarea value={postBody} onChange={(event) => setPostBody(event.target.value)} placeholder="Write the story, update, tribute, or announcement..." /></label>
+          <div className="media-imports"><label>Import pictures<input type="file" accept="image/*" multiple onChange={(event) => setPhotoName(event.target.files?.[0]?.name ?? 'No picture imported yet')} /></label><label>Import videos<input type="file" accept="video/*" multiple onChange={(event) => setVideoName(event.target.files?.[0]?.name ?? 'No video imported yet')} /></label></div>
+          <button className="sage-button" type="button">Publish {category === 'memorial' ? 'memorial' : 'general'} post</button>
         </form>
-      </section>
+        <aside className="live-order-card"><p className="brown-eyebrow">Post preview</p><h3>{postTitle || 'Untitled post'}</h3><strong>{category === 'memorial' ? 'Memorial' : 'General post'}</strong><p>{postBody || 'Your story preview appears here.'}</p><small>{photoName}</small><small>{videoName}</small>{category === 'memorial' ? <a className="cream-button" href={routeHref('memorials')}>Attach to memorial profile</a> : <a className="cream-button" href={routeHref('social')}>View in social feed</a>}</aside>
+      </div>
     </section>
   );
 }
 
 export default function App() {
+  const [{ route, productId }, setRouteState] = useState(getRouteFromHash);
+  const [basket, setBasket] = useState<BasketLine[]>(() => {
+    try { return JSON.parse(localStorage.getItem('petmemory-basket') || '[]') as BasketLine[]; } catch { return []; }
+  });
+
+  useEffect(() => {
+    const syncRoute = () => setRouteState(getRouteFromHash());
+    syncRoute();
+    window.addEventListener('hashchange', syncRoute);
+    return () => window.removeEventListener('hashchange', syncRoute);
+  }, []);
+  useEffect(() => { localStorage.setItem('petmemory-basket', JSON.stringify(basket)); }, [basket]);
+
+  const addProduct = (product: Product, petName = 'Biscuit', finish = product.material) => {
+    setBasket((current) => [...current, { id: `${product.id}-${Date.now()}`, productName: product.name, price: product.price, petName, finish }]);
+  };
+
   return (
-    <main>
-      <DesktopLanding />
-      <CollectionSection />
-      <HowItWorks />
-      <MobileMemorialProfile />
-      <BuilderPreview />
-      <CommerceExperience />
-      <AccountPortal />
-      <section className="final-band"><Sparkles size={18} /><h2>Start the memorial, then choose the keepsake when you are ready.</h2><a className="gold-button" href="#account">Create a PetMemory account</a></section>
+    <main className="app-shell">
+      <AppHeader route={route} />
+      {route === 'social' && <SocialPage />}
+      {route === 'memorials' && <MemorialsPage />}
+      {route === 'keepsakes' && <KeepsakesPage onAdd={addProduct} />}
+      {route === 'customize' && <CustomizerPage productId={productId} onAdd={addProduct} />}
+      {route === 'checkout' && <CheckoutPage basket={basket} />}
+      {route === 'post' && <PostPage />}
+      {route === 'signin' && <AccountPortal />}
+      <section className="final-band"><Sparkles size={18} /><h2>{route === 'signin' ? 'Save the whole memorial system to your account.' : 'Post first, memorialize when ready, then choose the keepsake.'}</h2><a className="gold-button" href={routeHref(route === 'signin' ? 'post' : 'signin')}>{route === 'signin' ? 'Create a post' : 'Sign in to save'}</a></section>
     </main>
   );
 }

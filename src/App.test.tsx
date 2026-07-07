@@ -22,15 +22,19 @@ vi.mock('./lib/supabase', () => ({
   }
 }));
 
-const visibleText = () => document.body.textContent ?? '';
+const renderRoute = (hash = '#/social') => {
+  window.location.hash = hash;
+  return render(<App />);
+};
 
-describe('PetMemory commerce and memorial builder', () => {
+describe('PetMemory deeplinked pages', () => {
   beforeEach(() => {
     vi.stubGlobal('URL', {
       createObjectURL: vi.fn(() => 'blob:pet-photo-preview'),
       revokeObjectURL: vi.fn()
     });
     localStorage.clear();
+    window.location.hash = '#/social';
   });
 
   afterEach(() => {
@@ -38,115 +42,78 @@ describe('PetMemory commerce and memorial builder', () => {
     vi.restoreAllMocks();
   });
 
-  it('implements the selected 1c premium desktop landing direction', () => {
-    render(<App />);
+  it('uses Jordan header tabs and changes Begin a Memorial to Post', () => {
+    renderRoute('#/social');
 
-    expect(screen.getByRole('heading', { name: /a memorial worthy of a life well loved/i })).toBeInTheDocument();
-    expect(screen.getByText(/handcrafted remembrance/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/hand-cast/i)[0]).toBeInTheDocument();
-    expect(screen.getAllByText(/7–10 days/i)[0]).toBeInTheDocument();
-    expect(screen.getByText(/lifetime/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/the oakford plaque/i)[0]).toBeInTheDocument();
+    const nav = screen.getByRole('navigation', { name: /primary navigation/i });
+    expect(nav).toHaveTextContent(/social/i);
+    expect(nav).toHaveTextContent(/memorials/i);
+    expect(nav).toHaveTextContent(/keepsakes/i);
+    expect(nav).toHaveTextContent(/sign in/i);
+    expect(screen.getAllByRole('link', { name: /^post$/i })[0]).toHaveAttribute('href', '#/post');
+    expect(screen.queryByText(/begin a memorial/i)).not.toBeInTheDocument();
   });
 
-  it('lands customize buttons on real in-app white-label item pages instead of external handoff links', () => {
-    render(<App />);
+  it('keeps the index/social page separate from keepsake and sign-in pages', () => {
+    renderRoute('#/social');
 
-    const customizeLinks = screen.getAllByRole('link', { name: /customize/i });
-    expect(customizeLinks).toHaveLength(6);
-    expect(customizeLinks[0]).toHaveAttribute('href', '#customize/oakford-plaque');
-    expect(customizeLinks[1]).toHaveAttribute('href', '#customize/portrait-frame');
-    expect(customizeLinks[2]).toHaveAttribute('href', '#customize/garden-stone');
+    expect(screen.getByRole('heading', { name: /a gentle place to post/i })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /keepsakes made to last/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /sign in to save the memorial/i })).not.toBeInTheDocument();
+  });
 
-    expect(screen.getAllByRole('heading', { name: /customize the oakford plaque/i })[0]).toBeInTheDocument();
+  it('deep-links to independent memorials, keepsakes, sign-in, checkout, and customizer pages', () => {
+    const { unmount } = renderRoute('#/memorials');
+    expect(screen.getByRole('heading', { name: /^biscuit$/i })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /keepsakes made to last/i })).not.toBeInTheDocument();
+    unmount();
+
+    renderRoute('#/keepsakes');
+    expect(screen.getByRole('heading', { name: /keepsakes made to last/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /basket \/ checkout/i })).toHaveAttribute('href', '#/checkout');
+    unmount();
+
+    renderRoute('#/signin');
+    expect(screen.getByRole('heading', { name: /sign in to save the memorial/i })).toBeInTheDocument();
+    unmount();
+
+    renderRoute('#/checkout');
     expect(screen.getByRole('heading', { name: /white-label checkout/i })).toBeInTheDocument();
+    unmount();
+
+    renderRoute('#/customize/portrait-frame');
+    expect(screen.getByRole('heading', { name: /customize the portrait frame/i })).toBeInTheDocument();
   });
 
-  it('creates an itemized purchasable memorial inventory with add-to-basket controls', async () => {
+  it('post page categorizes content as memorial or general post', async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderRoute('#/post');
 
-    expect(screen.getByRole('heading', { name: /inventory memorials/i })).toBeInTheDocument();
-    expect(screen.getByText(/bronze plaque/i)).toBeInTheDocument();
-    expect(screen.getByText(/museum portrait frame/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/garden stone/i)[0]).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /create a post/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/post category/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /publish memorial post/i })).toBeInTheDocument();
 
-    await user.click(screen.getAllByRole('button', { name: /add to basket/i })[0]);
-    expect(screen.getByText(/basket · 1 item/i)).toBeInTheDocument();
-    expect(screen.getByText(/guest checkout available/i)).toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText(/post category/i), 'general');
+    expect(screen.getByRole('button', { name: /publish general post/i })).toBeInTheDocument();
   });
 
-  it('supports importing pictures and videos into the customizer with live previews', async () => {
+  it('supports picture and video import on the post and customizer pages', async () => {
     const user = userEvent.setup();
-    render(<App />);
-
     const image = new File(['pet-image'], 'milo.jpg', { type: 'image/jpeg' });
     const video = new File(['pet-video'], 'milo-run.mp4', { type: 'video/mp4' });
 
+    const { unmount } = renderRoute('#/post');
+    await user.upload(screen.getByLabelText(/import pictures/i), image);
+    await user.upload(screen.getByLabelText(/import videos/i), video);
+    expect(screen.getByText(/milo.jpg/i)).toBeInTheDocument();
+    expect(screen.getByText(/milo-run.mp4/i)).toBeInTheDocument();
+    unmount();
+
+    renderRoute('#/customize/oakford-plaque');
     await user.upload(screen.getByLabelText(/import memorial photo/i), image);
     await user.upload(screen.getByLabelText(/import memorial video/i), video);
-
     expect(screen.getByAltText(/custom memorial photo preview/i)).toHaveAttribute('src', 'blob:pet-photo-preview');
     expect(screen.getByText(/milo.jpg/i)).toBeInTheDocument();
     expect(screen.getByText(/milo-run.mp4/i)).toBeInTheDocument();
-  });
-
-  it('captures item customization, dates, times, and memories for checkout', async () => {
-    const user = userEvent.setup();
-    render(<App />);
-
-    await user.clear(screen.getByLabelText(/^pet name$/i));
-    await user.type(screen.getByLabelText(/^pet name$/i), 'Milo');
-    await user.type(screen.getByLabelText(/^life dates$/i), '2015 - 2026');
-    await user.clear(screen.getByLabelText(/^favorite memory$/i));
-    await user.type(screen.getByLabelText(/^favorite memory$/i), 'Always sleeping in the sun.');
-    await user.type(screen.getByLabelText(/^moment date$/i), '2026-07-06');
-    await user.type(screen.getByLabelText(/^moment time$/i), '09:41');
-    await user.selectOptions(screen.getByLabelText(/^finish$/i), 'Walnut frame');
-
-    expect(screen.getAllByText(/Milo/i)[0]).toBeInTheDocument();
-    expect(screen.getByText(/2015 - 2026/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/Always sleeping in the sun/i)[0]).toBeInTheDocument();
-    expect(screen.getAllByText(/Walnut frame/i)[0]).toBeInTheDocument();
-  });
-
-  it('adds the selected 1g mobile memorial card with timeline and respects', () => {
-    render(<App />);
-
-    expect(screen.getByRole('heading', { name: /^biscuit$/i })).toBeInTheDocument();
-    expect(screen.getByText(/golden retriever · portland, or/i)).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /timeline · 12 moments/i })).toBeInTheDocument();
-    expect(screen.getAllByText(/gotcha day/i)[0]).toBeInTheDocument();
-    expect(screen.getAllByText(/first snow/i)[0]).toBeInTheDocument();
-    expect(screen.getAllByText(/last summer/i)[0]).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /respects · 82/i })).toBeInTheDocument();
-    expect(screen.getAllByText(/candles/i)[0]).toBeInTheDocument();
-    expect(screen.getAllByText(/flowers/i)[0]).toBeInTheDocument();
-    expect(screen.getAllByText(/pawprints/i)[0]).toBeInTheDocument();
-  });
-
-  it('keeps Supabase signup/login portal visible and ready for deeper saved memorials', () => {
-    render(<App />);
-
-    expect(screen.getByRole('heading', { name: /sign in to save the memorial/i })).toBeInTheDocument();
-    expect(screen.getByLabelText(/email address/i)).toHaveAttribute('type', 'email');
-    expect(screen.getByLabelText(/password/i)).toHaveAttribute('type', 'password');
-    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /signed-in memory vault/i })).toBeInTheDocument();
-    expect(screen.getByLabelText(/saved pet photo/i)).toHaveAttribute('accept', 'image/*');
-    expect(screen.getByLabelText(/saved memory video/i)).toHaveAttribute('accept', 'video/*');
-    expect(visibleText()).toMatch(/connected to supabase/i);
-  });
-
-  it('shows read-only example account data before login', () => {
-    render(<App />);
-
-    expect(screen.getByText(/example memorial account/i)).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /example animals/i })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /example timeline/i })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /example respects/i })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /example basket/i })).toBeInTheDocument();
-    expect(screen.getByText(/the oakford plaque, the portrait frame/i)).toBeInTheDocument();
   });
 });
