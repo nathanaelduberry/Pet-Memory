@@ -268,25 +268,37 @@
   .guest-checkout { display: grid; gap: 12px; }
   .totals { display: grid; gap: 6px; padding: 14px; border-radius: 18px; background: #eef2df; color: #4e704c; font-weight: 800; }
 
-  .portal-layout { display: grid; grid-template-columns: 360px 1fr; gap: 24px; align-items: start; }
-  .portal-login, .portal-card { display: grid; gap: 16px; padding: 24px; }
+  .portal-layout { display: grid; grid-template-columns: minmax(280px, .8fr) minmax(520px, 1.2fr); gap: 24px; align-items: start; }
+  .portal-login, .portal-card { display: grid; gap: 14px; padding: 22px; }
   .portal-login label { display: grid; gap: 8px; color: #5b4430; font-weight: 900; }
   .portal-login input { width: 100%; border: 1px solid rgba(122,92,58,.22); border-radius: 18px; background: rgba(255,255,255,.72); color: #3f3025; padding: 13px 14px; }
   .portal-actions { gap: 10px; flex-wrap: wrap; }
   .portal-note { margin: 0; color: #725c48; font-size: .92rem; }
   .signed-in-card, .pet-row, .example-banner { display: grid; gap: 6px; border: 1px solid rgba(122,92,58,.12); border-radius: 20px; background: rgba(255,255,255,.52); padding: 14px; }
   .signed-in-card span, .pet-row span { color: #4e704c; font-weight: 800; }
-  .portal-dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .example-banner { grid-column: 1 / -1; }
-  .example-banner strong { font-family: Georgia, serif; font-size: 20px; }
-  .animals-card { grid-row: span 2; }
-  .portal-card-heading { gap: 10px; }
-  .portal-card-heading h3 { font-size: 22px; }
-  .saved-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+  .portal-dashboard {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(230px, 1.15fr) minmax(210px, .95fr) minmax(210px, .95fr) minmax(230px, 1fr);
+    gap: 16px;
+    align-items: stretch;
+    width: 100%;
+  }
+  .portal-dashboard .portal-card { min-width: 0; align-content: start; }
+  .example-banner { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+  .example-banner strong { font-family: Georgia, serif; font-size: 20px; white-space: nowrap; }
+  .example-banner span { color: #725c48; font-weight: 700; }
+  .animals-card { grid-row: auto; }
+  .portal-card-heading { gap: 10px; align-items: center; }
+  .portal-card-heading h3 { font-size: 22px; line-height: 1.05; }
+  .pet-row { min-height: 150px; }
+  .pet-row p { margin: 4px 0 0; font-size: 14px; line-height: 1.55; }
+  .saved-list { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
   .saved-list li { display: grid; gap: 2px; padding: 10px 0; border-bottom: 1px solid #ead9bc; }
   .saved-list span { color: var(--muted); font-size: 13px; font-weight: 700; text-transform: capitalize; }
   .basket-card > strong { width: fit-content; padding: 7px 11px; border-radius: 999px; background: #eef2df; color: #4e704c; }
-  .basket-card .sage-button { width: fit-content; }
+  .basket-card p { margin: 0; font-size: 14px; }
+  .basket-card .sage-button { width: fit-content; max-width: 100%; line-height: 1.1; }
 
   .final-band { display: grid; justify-items: center; gap: 16px; text-align: center; color: #f7eedd; background: var(--espresso); border-radius: 0 0 20px 20px; margin-bottom: 40px; }
   .final-band h2 { max-width: 720px; color: #f7eedd; font-size: clamp(2rem, 4vw, 3rem); font-weight: 400; }
