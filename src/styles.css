@@ -88,7 +88,7 @@
     border-bottom: 1px solid var(--line-dark);
   }
 
-  .premium-brand, .premium-links, .hero-actions, .proof-row, .section-title-row, .product-action-row, .portal-actions, .portal-card-heading {
+  .premium-brand, .premium-links, .header-actions, .hero-actions, .proof-row, .section-title-row, .product-action-row, .portal-actions, .portal-card-heading {
     display: flex;
     align-items: center;
   }
@@ -110,6 +110,9 @@
   }
 
   .outline-pill { border: 1px solid var(--gold); color: var(--gold-text); padding: 11px 22px; }
+  .header-actions { gap: 10px; }
+  .basket-pill { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; border: 1px solid #4a3b2c; border-radius: 999px; color: #f6ebd8; padding: 11px 18px; font-size: 14px; font-weight: 800; }
+  .basket-pill:hover { color: var(--gold-text); transform: translateY(-2px); }
   .gold-button { border: 0; background: var(--gold); color: var(--espresso); padding: 15px 30px; box-shadow: 0 14px 30px rgba(0,0,0,.28); }
   .dark-button { border: 1px solid #4a3b2c; color: var(--gold-text); padding: 15px 26px; }
   .sage-button { border: 0; background: var(--sage); color: #fffaf0; padding: 12px 18px; }

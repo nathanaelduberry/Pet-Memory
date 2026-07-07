@@ -50,16 +50,23 @@ describe('PetMemory deeplinked pages', () => {
     expect(nav).toHaveTextContent(/memorials/i);
     expect(nav).toHaveTextContent(/keepsakes/i);
     expect(nav).toHaveTextContent(/sign in/i);
+    expect(screen.getByRole('link', { name: /basket with 0 items/i })).toHaveAttribute('href', '#/checkout');
     expect(screen.getAllByRole('link', { name: /^post$/i })[0]).toHaveAttribute('href', '#/post');
     expect(screen.queryByText(/begin a memorial/i)).not.toBeInTheDocument();
   });
 
-  it('keeps the index/social page separate from keepsake and sign-in pages', () => {
+  it('keeps the index/social page useful with popular keepsakes while keeping sign-in separate', async () => {
+    const user = userEvent.setup();
     renderRoute('#/social');
 
     expect(screen.getByRole('heading', { name: /a gentle place to post/i })).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: /keepsakes made to last/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /keepsakes made to last/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /all keepsakes/i })).toHaveAttribute('href', '#/keepsakes');
+    expect(screen.getByText(/the oakford plaque/i)).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: /sign in to save the memorial/i })).not.toBeInTheDocument();
+
+    await user.click(screen.getAllByRole('button', { name: /add to basket/i })[0]);
+    expect(screen.getByRole('link', { name: /basket with 1 items/i })).toHaveTextContent(/basket · 1/i);
   });
 
   it('deep-links to independent memorials, keepsakes, sign-in, checkout, and customizer pages', () => {

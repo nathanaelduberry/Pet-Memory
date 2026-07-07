@@ -87,7 +87,7 @@ function getRouteFromHash(): { route: RouteName; productId?: string } {
   return { route: 'social' };
 }
 
-function AppHeader({ route }: { route: RouteName }) {
+function AppHeader({ route, basketCount }: { route: RouteName; basketCount: number }) {
   const tabs: Array<[RouteName, string]> = [
     ['social', 'Social'],
     ['memorials', 'Memorials'],
@@ -104,14 +104,18 @@ function AppHeader({ route }: { route: RouteName }) {
       <nav className="premium-links" aria-label="Primary navigation">
         {tabs.map(([tab, label]) => <a key={tab} className={route === tab ? 'active-tab' : ''} href={routeHref(tab)}>{label}</a>)}
       </nav>
-      <a className="outline-pill" href={routeHref('post')}>Post</a>
+      <div className="header-actions">
+        <a className="basket-pill" href={routeHref('checkout')} aria-label={`Basket with ${basketCount} items`}><ShoppingBag size={16} /> Basket{basketCount ? ` · ${basketCount}` : ''}</a>
+        <a className="outline-pill" href={routeHref('post')}>Post</a>
+      </div>
     </header>
   );
 }
 
-function SocialPage() {
+function SocialPage({ onAdd }: { onAdd: (product: Product) => void }) {
   return (
-    <section className="premium-shell page-shell social-page" aria-label="PetMemory social feed">
+    <>
+      <section className="premium-shell page-shell social-page" aria-label="PetMemory social feed">
       <div className="premium-hero social-hero">
         <div className="hero-copy">
           <p className="gold-eyebrow">Social</p>
@@ -128,16 +132,18 @@ function SocialPage() {
           <article className="post-card"><span>General post</span><h3>Sunny walk in the park</h3><p>Upload photos, add a story, then categorize it when posting.</p></article>
         </div>
       </div>
-    </section>
+      </section>
+      <CollectionSection onAdd={onAdd} compact />
+    </>
   );
 }
 
-function CollectionSection({ onAdd }: { onAdd: (product: Product) => void }) {
+function CollectionSection({ onAdd, compact = false }: { onAdd: (product: Product) => void; compact?: boolean }) {
   return (
-    <section className="collection-section page-section">
+    <section className={`collection-section page-section${compact ? ' social-keepsakes' : ''}`}>
       <div className="section-title-row">
         <div><p className="brown-eyebrow">The Collection</p><h2>Keepsakes made to last</h2></div>
-        <a href={routeHref('checkout')}>Basket / checkout →</a>
+        <a href={routeHref(compact ? 'keepsakes' : 'checkout')}>{compact ? 'All keepsakes →' : 'Basket / checkout →'}</a>
       </div>
       <div className="product-grid">
         {products.map((product) => (
@@ -318,8 +324,8 @@ export default function App() {
 
   return (
     <main className="app-shell">
-      <AppHeader route={route} />
-      {route === 'social' && <SocialPage />}
+      <AppHeader route={route} basketCount={basket.length} />
+      {route === 'social' && <SocialPage onAdd={addProduct} />}
       {route === 'memorials' && <MemorialsPage />}
       {route === 'keepsakes' && <KeepsakesPage onAdd={addProduct} />}
       {route === 'customize' && <CustomizerPage productId={productId} onAdd={addProduct} />}
